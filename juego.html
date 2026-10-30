@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Juego de Emociones | PEC</title>
+     <link rel="stylesheet" href="estilos.css">
+
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    
+</head>
+
+<body>
+
+<header>
+
+    <h1>💜 El Juego de Emolín 💜</h1>
+
+    <p>
+        PEC: Tejiendo por la Salud Mental y el Éxito Escolar
+    </p>
+
+</header>
+
+<nav>
+    <a href="cuestionario.html">Cuestionario</a>
+    <a href="index.html">Principio</a>
+</nav>
+
+<main class="contenedor">
+
+    <section class="instrucciones">
+
+        <h2>🎴 Encuentra las 5 cartas de motivación</h2>
+
+        <p>
+            Hay 10 cartas escondidas. 💜
+            Cinco contienen mensajes de motivación y las otras
+            cinco esconden retos sorpresa.
+            ¡Pero cuidado! Una de ellas puede hacerte perder. 👀
+        </p>
+
+        <div class="marcador">
+
+            <div class="dato">
+                💜 Motivaciones:
+                <span id="contador">0</span>/5
+            </div>
+
+            <div class="dato">
+                🎴 Cartas restantes:
+                <span id="restantes">10</span>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <section class="tablero" id="tablero">
+
+        <!-- Las cartas aparecerán aquí automáticamente -->
+
+    </section>
+
+
+    <section class="resultado" id="resultado">
+
+        <h2 id="tituloResultado"></h2>
+
+        <p id="textoResultado"></p>
+
+        <button class="boton" onclick="reiniciarJuego()">
+            🔄 Jugar otra vez
+        </button>
+
+    </section>
+
+</main>
+
+
+<footer>
+
+    💜 PEC — Tejiendo por la Salud Mental y el Éxito Escolar 💜
+
+</footer>
+
+
+<script>
+
+    /* ========================================== */
+    /* CONTENIDO DE LAS 10 CARTAS                */
+    /* ========================================== */
+
+    const cartasOriginales = [
+
+        /* 5 CARTAS DE MOTIVACIÓN */
+
+        {
+            tipo: "motivacion",
+            icono: "🌷",
+            mensaje: "¡Sigue adelante! Incluso los pequeños pasos te acercan a tus metas."
+        },
+
+        {
+            tipo: "motivacion",
+            icono: "💜",
+            mensaje: "Eres capaz de lograr mucho más de lo que imaginas. Confía en ti."
+        },
+
+        {
+            tipo: "motivacion",
+            icono: "⭐",
+            mensaje: "No necesitas ser perfecto/a. Lo importante es aprender y seguir intentando."
+        },
+
+        {
+            tipo: "motivacion",
+            icono: "🌸",
+            mensaje: "Tu esfuerzo también cuenta, incluso cuando los resultados tardan en llegar."
+        },
+
+        {
+            tipo: "motivacion",
+            icono: "✨",
+            mensaje: "Nunca olvides que pedir ayuda también es una forma de ser fuerte."
+        },
+
+
+        /* 4 CARTAS RANDOM */
+
+        {
+            tipo: "reto",
+            icono: "💰",
+            mensaje: "¡Excelente! Tu misión es encontrar una moneda de 50 sentavos. 💰"
+        },
+
+        {
+            tipo: "reto",
+            icono: "🔑",
+            mensaje: "¡Reto sorpresa! Encuentra unas llaves color rosa y negro, antes de continuar. 🔑"
+        },
+
+        {
+            tipo: "reto",
+            icono: "💜",
+            mensaje: "¡Misión especial! Encuentra algún objeto de color morado y cuadrado. 💜"
+        },
+
+        {
+            tipo: "reto",
+            icono: "✏️",
+            mensaje: "¡Reto rápido! Encuentra un lápiz, pluma o marcador color verde limon. ✏️"
+        },
+
+
+        /* 1 CARTA DE PERDER */
+
+        {
+            tipo: "perdiste",
+            icono: "😿",
+            mensaje: "¡Oh no! Lo siento, has encontrado la carta secreta. Has perdido esta ronda."
+        }
+
+    ];
+
+
+    const emojis = [
+        "😊",
+        "🥰",
+        "😎",
+        "🤭",
+        "😺",
+        "🤩",
+        "😸",
+        "🥳",
+        "😇",
+        "🤗"
+    ];
+
+
+    let motivacionesEncontradas = 0;
+
+    let cartasAbiertas = 0;
+
+    let juegoTerminado = false;
+
+
+    /* ========================================== */
+    /* MEZCLAR CARTAS                             */
+    /* ========================================== */
+
+    function mezclar(array) {
+
+        for (let i = array.length - 1; i > 0; i--) {
+
+            const j =
+                Math.floor(Math.random() * (i + 1));
+
+            [array[i], array[j]] =
+                [array[j], array[i]];
+
+        }
+
+        return array;
+
+    }
+
+
+    /* ========================================== */
+    /* CREAR JUEGO                                */
+    /* ========================================== */
+
+    function crearJuego() {
+
+        const tablero =
+            document.getElementById("tablero");
+
+        tablero.innerHTML = "";
+
+
+        const cartas =
+            mezclar([...cartasOriginales]);
+
+
+        const emojisMezclados =
+            mezclar([...emojis]);
+
+
+        cartas.forEach((datos, indice) => {
+
+            const carta =
+                document.createElement("div");
+
+
+            carta.classList.add(
+                "carta",
+                datos.tipo
+            );
+
+
+            carta.innerHTML = `
+
+                <div class="carta-interior">
+
+                    <div class="cara frente">
+
+                        <div class="emoji">
+                            ${emojisMezclados[indice]}
+                        </div>
+
+                        <p>
+                            Tócame para descubrirme
+                        </p>
+
+                    </div>
+
+
+                    <div class="cara atras">
+
+                        <div class="icono">
+                            ${datos.icono}
+                        </div>
+
+                        <p>
+                            ${datos.mensaje}
+                        </p>
+
+                    </div>
+
+                </div>
+
+            `;
+
+
+            carta.addEventListener(
+                "click",
+                function() {
+
+                    voltearCarta(
+                        carta,
+                        datos
+                    );
+
+                }
+            );
+
+
+            tablero.appendChild(carta);
+
+        });
+
+    }
+
+
+    /* ========================================== */
+    /* VOLTEAR CARTA                              */
+    /* ========================================== */
+
+    function voltearCarta(carta, datos) {
+
+        if (
+            juegoTerminado ||
+            carta.classList.contains("volteada")
+        ) {
+            return;
+        }
+
+
+        carta.classList.add("volteada");
+
+        cartasAbiertas++;
+
+
+        document.getElementById(
+            "restantes"
+        ).textContent =
+            10 - cartasAbiertas;
+
+
+        /* MOTIVACIÓN */
+
+        if (datos.tipo === "motivacion") {
+
+            motivacionesEncontradas++;
+
+
+            document.getElementById(
+                "contador"
+            ).textContent =
+                motivacionesEncontradas;
+
+
+            if (motivacionesEncontradas === 5) {
+
+                setTimeout(
+                    ganarJuego,
+                    700
+                );
+
+            }
+
+        }
+
+
+        /* CARTA PERDISTE */
+
+        if (datos.tipo === "perdiste") {
+
+            setTimeout(
+                perderJuego,
+                700
+            );
+
+        }
+
+    }
+
+
+    /* ========================================== */
+    /* GANAR                                      */
+    /* ========================================== */
+
+    function ganarJuego() {
+
+        juegoTerminado = true;
+
+
+        const resultado =
+            document.getElementById("resultado");
+
+
+        document.getElementById(
+            "tituloResultado"
+        ).innerHTML =
+            "🎉💜 ¡Felicidades! 💜🎉";
+
+
+        document.getElementById(
+            "textoResultado"
+        ).innerHTML =
+
+            "¡Encontraste las 5 cartas de motivación! " +
+
+            "Recuerda guardar esos mensajes contigo. " +
+
+            "Cada día es una nueva oportunidad para aprender, crecer y volver a intentarlo. 🌷✨";
+
+
+        resultado.style.display = "block";
+
+
+        resultado.scrollIntoView({
+
+            behavior: "smooth",
+
+            block: "center"
+
+        });
+
+    }
+
+
+    /* ========================================== */
+    /* PERDER                                     */
+    /* ========================================== */
+
+    function perderJuego() {
+
+        juegoTerminado = true;
+
+
+        const resultado =
+            document.getElementById("resultado");
+
+
+        document.getElementById(
+            "tituloResultado"
+        ).innerHTML =
+            "😿 ¡Oh no!";
+
+
+        document.getElementById(
+            "textoResultado"
+        ).innerHTML =
+
+            "Lo siento, encontraste la carta de perder. " +
+
+            "Pero no pasa nada... ¡puedes volver a intentarlo! 💜";
+
+
+        resultado.style.display = "block";
+
+
+        resultado.scrollIntoView({
+
+            behavior: "smooth",
+
+            block: "center"
+
+        });
+
+    }
+
+
+    /* ========================================== */
+    /* REINICIAR                                  */
+    /* ========================================== */
+
+    function reiniciarJuego() {
+
+        motivacionesEncontradas = 0;
+
+        cartasAbiertas = 0;
+
+        juegoTerminado = false;
+
+
+        document.getElementById(
+            "contador"
+        ).textContent = "0";
+
+
+        document.getElementById(
+            "restantes"
+        ).textContent = "10";
+
+
+        document.getElementById(
+            "resultado"
+        ).style.display = "none";
+
+
+        crearJuego();
+
+
+        window.scrollTo({
+
+            top: 0,
+
+            behavior: "smooth"
+
+        });
+
+    }
+
+
+    /* ========================================== */
+    /* INICIAR JUEGO                              */
+    /* ========================================== */
+
+    crearJuego();
+
+</script>
+
+</body>
+</html>
